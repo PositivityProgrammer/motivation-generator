@@ -36,6 +36,9 @@ jobs:
           path: test-results
       - codecov/upload:
           file: coverage.xml
+          flags: unittests
+          token: ${CODECOV_TOKEN}
+          slug: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
 
   build:
     docker:
