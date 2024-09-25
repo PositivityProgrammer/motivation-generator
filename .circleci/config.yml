@@ -17,14 +17,16 @@ jobs:
       - run:
           name: Run tests
           command: |
-            docker run --rm myapp:test pytest --cov=src tests/
+            docker run --name test_container myapp:test pytest --cov=src --cov-report=xml:coverage.xml tests/
       - run:
           name: Copy test results
           command: |
-            docker create --name test_container myapp:test
             docker cp test_container:/app/coverage.xml ./coverage.xml
             docker cp test_container:/app/.coverage ./.coverage
-            docker rm test_container
+          when: always
+      - run:
+          name: Clean up
+          command: docker rm test_container
           when: always
       - store_artifacts:
           path: coverage.xml
@@ -33,7 +35,7 @@ jobs:
           path: .coverage
           destination: coverage-data
       - store_test_results:
-          path: test-results
+          path: .
 
 workflows:
   version: 2

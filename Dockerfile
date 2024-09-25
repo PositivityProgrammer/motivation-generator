@@ -1,4 +1,3 @@
-# Этап сборки и тестирования
 FROM python:3.12.3-slim as builder
 
 WORKDIR /app
@@ -6,7 +5,7 @@ WORKDIR /app
 # Копируем файлы зависимостей
 COPY requirements.txt requirements-dev.txt ./
 
-# Устанавливаем зависимости, включая инструменты для разработки
+# Устанавливаем все зависимости
 RUN pip install --no-cache-dir -r requirements-dev.txt
 
 # Копируем весь проект
@@ -15,20 +14,15 @@ COPY . .
 # Устанавливаем PYTHONPATH
 ENV PYTHONPATH=/app/src
 
-# Запускаем тесты
-RUN pytest --cov=src tests/
-
-# Этап создания production-образа
+# Этап создания финального образа
 FROM python:3.12.3-slim
 
 WORKDIR /app
 
-# Копируем только необходимые файлы из этапа сборки
-COPY --from=builder /app/src/ ./src/
-COPY --from=builder /app/requirements.txt .
-
-# Устанавливаем только production-зависимости
-RUN pip install --no-cache-dir -r requirements.txt
+# Копируем файлы из этапа сборки
+COPY --from=builder /app /app
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Устанавливаем PYTHONPATH
 ENV PYTHONPATH=/app/src
