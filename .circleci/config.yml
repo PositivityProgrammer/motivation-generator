@@ -10,13 +10,14 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.14
+          version: 20.10.18
       - docker/build:
           image: myapp
+          tag: latest
       - run:
           name: Run tests in Docker
           command: |
-            docker run myapp pytest --cov=src tests
+            docker run myapp:latest pytest --cov=src tests
 
   deploy:
     docker:
@@ -24,9 +25,10 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.14
+          version: 20.10.18
       - docker/build:
           image: myapp
+          tag: latest
       - run:
           name: Deploy to production
           command: |
