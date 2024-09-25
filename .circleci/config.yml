@@ -17,17 +17,23 @@ jobs:
       - run:
           name: Run tests
           command: |
+            docker run --rm myapp:test pytest --cov=src tests/
+      - run:
+          name: Copy test results
+          command: |
             docker create --name test_container myapp:test
-            docker cp test_container:/app/. ./app_contents
+            docker cp test_container:/app/coverage.xml ./coverage.xml
+            docker cp test_container:/app/.coverage ./.coverage
             docker rm test_container
-            cd app_contents
-            pip install -r requirements-dev.txt
-            pytest --cov=src tests/ || true
+          when: always
       - store_artifacts:
-          path: app_contents/coverage.xml
+          path: coverage.xml
           destination: coverage-report
+      - store_artifacts:
+          path: .coverage
+          destination: coverage-data
       - store_test_results:
-          path: app_contents/test-results
+          path: test-results
 
 workflows:
   version: 2
