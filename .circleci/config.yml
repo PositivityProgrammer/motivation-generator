@@ -14,7 +14,6 @@ jobs:
       - docker/build:
           image: myapp
           tag: test
-          target: builder # Собираем до этапа builder для тестов
       - run:
           name: Run tests
           command: |
@@ -22,7 +21,8 @@ jobs:
             docker cp test_container:/app/. ./app_contents
             docker rm test_container
             cd app_contents
-            pytest --cov=src tests/ || true  # Добавляем || true, чтобы job не завершался с ошибкой
+            pip install -r requirements-dev.txt
+            pytest --cov=src tests/ || true
       - store_artifacts:
           path: app_contents/coverage.xml
           destination: coverage-report
