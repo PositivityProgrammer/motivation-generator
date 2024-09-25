@@ -36,6 +36,7 @@ jobs:
           path: test-results
       - codecov/upload:
           file: coverage.xml
+          flags: unittests
 
   build:
     docker:
