@@ -17,7 +17,7 @@ jobs:
             docker start temp_container
             docker exec temp_container ls -l /
             docker exec temp_container cat /coverage.xml | head -n 5
-            docker cp temp_container:/coverage.xml ./coverage.xml || echo "Failed to copy coverage.xml"
+            docker cp temp_container:/coverage.xml ./coverage.xml
             docker rm temp_container
       - run:
           name: Check for coverage.xml
