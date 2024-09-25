@@ -1,47 +1,57 @@
+version: 2.1
+
 orbs:
   docker: circleci/docker@2.1.1
 
 jobs:
-  build-and-test:
+  test:
+    docker:
+      - image: cimg/python:3.12.3
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+      - run:
+          name: Install dependencies
+          command: |
+            python -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt -r requirements-dev.txt
+      - save_cache:
+          paths:
+            - ./venv
+          key: deps-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            pytest --cov=src --cov-report=xml tests/
+      - store_artifacts:
+          path: coverage.xml
+          destination: coverage-report
+      - store_test_results:
+          path: test-results
+
+  build:
     docker:
       - image: cimg/python:3.12.3
     steps:
       - checkout
       - setup_remote_docker:
           version: default
-      - run:
-          name: Build and inspect test-results image
-          command: |
-            docker build --target test-results -t myapp-test-results:latest .
-            docker create --name temp_container myapp-test-results:latest
-            docker start temp_container
-            docker exec temp_container ls -l /
-            docker exec temp_container cat /coverage.xml | head -n 5
-            docker cp temp_container:/coverage.xml ./coverage.xml
-            docker rm temp_container
-      - run:
-          name: Check for coverage.xml
-          command: |
-            ls -l
-            if [ -f coverage.xml ]; then
-              echo "coverage.xml exists"
-              head -n 5 coverage.xml
-            else
-              echo "coverage.xml does not exist"
-            fi
-      - store_artifacts:
-          path: coverage.xml
-          destination: coverage-report
-      - store_test_results:
-          path: .
-      - run:
-          name: Build final image
-          command: |
-            docker build -t myapp:latest .
-            docker images
+      - docker/build:
+          image: myapp
+          tag: latest
 
 workflows:
   version: 2
-  build-test-deploy:
+  test-and-build:
     jobs:
-      - build-and-test
+      - test
+      - build:
+          requires:
+            - test
+          filters:
+            branches:
+              only: main
