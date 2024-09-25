@@ -1,4 +1,3 @@
-# Этап сборки и тестирования
 FROM python:3.12.3-slim as builder
 
 WORKDIR /app
@@ -16,11 +15,14 @@ COPY . .
 ENV PYTHONPATH=/app/src
 
 # Запускаем тесты и сохраняем результаты
-RUN pytest --cov=src --cov-report=xml:/app/coverage.xml tests/
+RUN pytest --cov=src --cov-report=xml:/app/coverage.xml tests/ && \
+    ls -l /app && \
+    cat /app/coverage.xml | head -n 5
 
 # Промежуточный этап для сохранения результатов тестов
 FROM scratch as test-results
 COPY --from=builder /app/coverage.xml .
+RUN ["ls", "-l", "/"]
 
 # Этап создания финального образа
 FROM python:3.12.3-slim

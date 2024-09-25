@@ -1,5 +1,3 @@
-version: 2.1
-
 orbs:
   docker: circleci/docker@2.1.1
 
@@ -11,24 +9,36 @@ jobs:
       - checkout
       - setup_remote_docker:
           version: default
-      - docker/build:
-          image: myapp-test-results
-          tag: latest
-          target: test-results
       - run:
-          name: Extract test results
+          name: Build and inspect test-results image
           command: |
+            docker build --target test-results -t myapp-test-results:latest .
             docker create --name temp_container myapp-test-results:latest
-            docker cp temp_container:/coverage.xml ./coverage.xml
+            docker start temp_container
+            docker exec temp_container ls -l /
+            docker exec temp_container cat /coverage.xml | head -n 5
+            docker cp temp_container:/coverage.xml ./coverage.xml || echo "Failed to copy coverage.xml"
             docker rm temp_container
+      - run:
+          name: Check for coverage.xml
+          command: |
+            ls -l
+            if [ -f coverage.xml ]; then
+              echo "coverage.xml exists"
+              head -n 5 coverage.xml
+            else
+              echo "coverage.xml does not exist"
+            fi
       - store_artifacts:
           path: coverage.xml
           destination: coverage-report
       - store_test_results:
           path: .
-      - docker/build:
-          image: myapp
-          tag: latest
+      - run:
+          name: Build final image
+          command: |
+            docker build -t myapp:latest .
+            docker images
 
 workflows:
   version: 2
