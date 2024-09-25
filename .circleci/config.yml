@@ -12,12 +12,13 @@ jobs:
       - setup_remote_docker:
           version: default
       - docker/build:
-          image: myapp
-          tag: test
+          image: myapp-test-results
+          tag: latest
+          target: test-results
       - run:
           name: Extract test results
           command: |
-            docker create --name temp_container myapp:test
+            docker create --name temp_container myapp-test-results:latest
             docker cp temp_container:/coverage.xml ./coverage.xml
             docker rm temp_container
       - store_artifacts:
@@ -25,6 +26,9 @@ jobs:
           destination: coverage-report
       - store_test_results:
           path: .
+      - docker/build:
+          image: myapp
+          tag: latest
 
 workflows:
   version: 2

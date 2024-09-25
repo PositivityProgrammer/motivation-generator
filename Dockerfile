@@ -18,7 +18,7 @@ ENV PYTHONPATH=/app/src
 # Запускаем тесты и сохраняем результаты
 RUN pytest --cov=src --cov-report=xml:/app/coverage.xml tests/
 
-# Этап для сохранения результатов тестов
+# Промежуточный этап для сохранения результатов тестов
 FROM scratch as test-results
 COPY --from=builder /app/coverage.xml .
 
