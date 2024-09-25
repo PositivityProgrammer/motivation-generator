@@ -15,30 +15,19 @@ jobs:
           image: myapp
           tag: test
       - run:
-          name: Run tests
+          name: Extract test results
           command: |
-            docker run --name test_container myapp:test pytest --cov=src --cov-report=xml:coverage.xml tests/
-      - run:
-          name: Copy test results
-          command: |
-            docker cp test_container:/app/coverage.xml ./coverage.xml
-            docker cp test_container:/app/.coverage ./.coverage
-          when: always
-      - run:
-          name: Clean up
-          command: docker rm test_container
-          when: always
+            docker create --name temp_container myapp:test
+            docker cp temp_container:/coverage.xml ./coverage.xml
+            docker rm temp_container
       - store_artifacts:
           path: coverage.xml
           destination: coverage-report
-      - store_artifacts:
-          path: .coverage
-          destination: coverage-data
       - store_test_results:
           path: .
 
 workflows:
   version: 2
-  build-and-test:
+  build-test-deploy:
     jobs:
       - build-and-test

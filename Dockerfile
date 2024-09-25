@@ -1,3 +1,4 @@
+# Этап сборки и тестирования
 FROM python:3.12.3-slim as builder
 
 WORKDIR /app
@@ -14,15 +15,24 @@ COPY . .
 # Устанавливаем PYTHONPATH
 ENV PYTHONPATH=/app/src
 
+# Запускаем тесты и сохраняем результаты
+RUN pytest --cov=src --cov-report=xml:/app/coverage.xml tests/
+
+# Этап для сохранения результатов тестов
+FROM scratch as test-results
+COPY --from=builder /app/coverage.xml .
+
 # Этап создания финального образа
 FROM python:3.12.3-slim
 
 WORKDIR /app
 
-# Копируем файлы из этапа сборки
-COPY --from=builder /app /app
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+# Копируем только необходимые файлы из этапа сборки
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/requirements.txt .
+
+# Устанавливаем только production-зависимости
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Устанавливаем PYTHONPATH
 ENV PYTHONPATH=/app/src
