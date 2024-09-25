@@ -10,7 +10,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.18
+          version: default
       - docker/build:
           image: myapp
           tag: latest
