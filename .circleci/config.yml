@@ -34,9 +34,7 @@ jobs:
           destination: coverage-report
       - store_test_results:
           path: test-results
-      - codecov/upload:
-          file: coverage.xml
-          flags: unittests
+      - codecov/upload
 
   build:
     docker:
