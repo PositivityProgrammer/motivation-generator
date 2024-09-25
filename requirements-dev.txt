@@ -2,4 +2,3 @@
 pytest==8.3.3
 pytest-cov==5.0.0
 coverage==7.6.1
-pytest-junit==1.0.0
