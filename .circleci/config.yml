@@ -29,7 +29,7 @@ jobs:
             . venv/bin/activate
             mkdir test-results
             pytest --cov=src --cov-report=xml:coverage.xml --junitxml=test-results/junit.xml tests/
-            pytest --cov .
+            pytest --cov tests/
       - codecov/upload
       - store_artifacts:
           path: coverage.xml
