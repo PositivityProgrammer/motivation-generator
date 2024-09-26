@@ -50,12 +50,10 @@ workflows:
   test-and-build:
     jobs:
       - test
-      - codecov/upload:
-          file: coverage.xml
-          flags: unittests
       - build:
           requires:
             - test
           filters:
             branches:
               only: main
+      - codecov/upload
