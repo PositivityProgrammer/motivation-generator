@@ -34,6 +34,8 @@ jobs:
           destination: coverage-report
       - store_test_results:
           path: test-results
+      - codecov/upload:
+          file: coverage.xml
 
   build:
     docker:
@@ -50,10 +52,10 @@ workflows:
   test-and-build:
     jobs:
       - test
+      - codecov/upload
       - build:
           requires:
             - test
           filters:
             branches:
               only: main
-      - codecov/upload
