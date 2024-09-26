@@ -3,8 +3,6 @@ version: 2.1
 orbs:
   docker: circleci/docker@2.1.1
   codecov: codecov/codecov@4
-  env:
-    CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
 jobs:
   test:
@@ -36,9 +34,6 @@ jobs:
           destination: coverage-report
       - store_test_results:
           path: test-results
-      - codecov/upload:
-          file: coverage.xml
-          flags: unittests
 
   build:
     docker:
