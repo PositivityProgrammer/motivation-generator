@@ -52,7 +52,6 @@ workflows:
   test-and-build:
     jobs:
       - test
-      - codecov/upload
       - build:
           requires:
             - test
